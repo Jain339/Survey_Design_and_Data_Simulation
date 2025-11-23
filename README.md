@@ -169,8 +169,8 @@ Assignment1/
 ### **1. Clone the Repository**
 
 ```bash
-git clone https://github.com/your-username/STA304-Assignment1.git
-cd STA304-Assignment1
+git clone https://github.com/your-username/Survey_Design_and_Data_Simulation.git
+cd Survey_Design_and_Data_Simulation
 ```
 
 ### **2. Install Required R Packages**
