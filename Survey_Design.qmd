@@ -1,0 +1,735 @@
+---
+title: "Indigenous Students' Persepctive: Recommendations for STEMBuddies"
+author: "A1 GROUP 46: Narae Lee, Nikita Jain, Radia Salam"
+subtitle: "STA304 - Fall 2025 - Assignment 1"
+format: pdf
+editor: visual
+---
+
+```{r, include = FALSE}
+
+# Required libraries
+library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+
+# Set seed
+set.seed(921)
+
+# Sampling responses to Q1 - What grade are you in?
+# grades are randomly sampled
+survey_grades <- c("9", "10", "11", "12")
+grade <- sample(x=survey_grades, size=1000,replace=TRUE)
+
+
+
+# Sampling responses to Q2 - Do you wish to self-identify as an Aboriginal person in Canada such as First Nation, Métis or Inuit?
+survey_is_indigenous <- c("Yes", "No")
+is_indigenous <- sample(x=survey_is_indigenous, size=1000, replace=TRUE, c(0.25, 0.75))
+
+
+# Samling responses for Q5 - What did you think of length of the STEMBuddies Handbook?
+# Randomly sampled
+length_opts <- c("Too lengthy", "Moderate", "Too short")
+handbook_length <- sample(x=length_opts, size = 1000, replace = TRUE)
+
+
+# Building data frame with the demographic questions (Q1, Q2, Q5)
+survey_response <- data.frame(grade, is_indigenous, handbook_length)
+
+
+# Counting number of Indigenous and Non-Indigenous students based on the survey responses
+num_indige <- sum(survey_response$is_indigenous== "Yes")
+num_nonindige <- sum(survey_response$is_indigenous == "No")
+
+
+# Assessing how many indigenous and nonindigenous students are also first gen uni students
+indige_first_gen    <- c("Yes", "No", "Prefer not to say")
+nonindige_first_gen <- c("Yes", "No", "Prefer not to say")
+
+
+# Indigenous students have higher percentage of first gen uni students according to the lit review
+indige_sample <- sample(indige_first_gen, size = num_indige, replace=TRUE, prob = c(0.80, 0.15, 0.05))
+
+nonindige_sample <- sample(nonindige_first_gen, size = num_nonindige, replace=TRUE, prob = c(0.40, 0.55, 0.05))
+
+
+# Options for Plans after high school
+post_plans <- c("University", "College", "Apprenticeship", "Workforce", "Not sure")
+
+
+survey_response <- survey_response %>%
+  group_by(is_indigenous) %>%
+  mutate(
+    is_first_gen = if (first(is_indigenous) == "Yes") { # Higher first gen uni student population in Indigenous group
+      sample(c("Yes","No","Prefer not to say"), n(), TRUE, c(0.65, 0.20, 0.15))
+    } else { # Relatively lower first gen uni student population in Indigenous group
+      sample(c("Yes","No","Prefer not to say"), n(), TRUE, c(0.40, 0.50, 0.10))
+    },
+    post_plan = if (first(is_indigenous) == "Yes") {     # Indigenous students answered 20% University, 15% College, 10% Apprenticeship, 30% Workforce and 30% Not sure
+      sample(post_plans, n(), TRUE, c(0.20, 0.10, 0.10, 0.30, 0.30))
+    } else { 
+      # Non Indigenous students answered 35% University, 20% College, 20% Apprenticeship, 15% Workforce and 10% Not sure
+      sample(post_plans, n(), TRUE, c(0.35, 0.20, 0.20, 0.15, 0.10))
+    }
+  )
+
+
+# Options from the question "Which section did you find most helpful"
+helpful_sections <- c("Before High School", "Transitioning", "Study Techniques", "Pathways to Post-Secon", "Course Selection", "Extracurriculars", "Awards", "Uni Program Req", "OUAC", "Uni Admissions", "Post-Sec program", "Dos and Donts", "Scholarships", "Applying Abroad")
+
+
+# Options from the question "Which part of the Handbook do you think needs more detail/was not comprehensive enough?"
+more_detail <- c("Before High School", "Transitioning", "Study Techniques", "Pathways to Post-Secon", "Course Selection", "Extracurriculars", "Awards", "Uni Program Req", "OUAC", "Uni Admissions", "Post-Sec program", "Dos and Donts", "Scholarships", "Applying Abroad")
+
+
+
+K <- length(helpful_sections)
+
+p_non_helpful <- rep(1/K, K)
+w_ind_helpful <- c(
+  0.027, # Before High School
+  0.027, # Transitioning
+  0.027, # Study Techniques
+  0.027, # Pathways to Post-Secon
+  0.027, # Course Selection
+  0.027, # Extracurriculars
+  0.027, # Awards
+  0.20,  # Uni Program Req (TOP 3)
+  0.20,  # OUAC (TOP 3)
+  0.027, # Uni Admissions
+  0.25,  # Post-Sec program (TOP 3)
+  0.027, # Dos and Donts
+  0.027, # Scholarships
+  0.027 # Applying Abroad
+)
+p_ind_helpful <- w_ind_helpful / sum(w_ind_helpful)
+
+pick3_vec <- function(opts, prob) sample(opts, 3, replace = FALSE, prob = prob)
+
+n <- nrow(survey_response)
+survey_response$helpful1 <- NA_character_
+survey_response$helpful2 <- NA_character_
+survey_response$helpful3 <- NA_character_
+
+for (i in seq_len(n)) {
+  if (survey_response$is_indigenous[i] == "Yes") {
+    picks <- pick3_vec(helpful_sections, p_ind_helpful)
+  } else {
+    picks <- pick3_vec(helpful_sections, p_non_helpful)
+  }
+  survey_response$helpful1[i] <- picks[1]
+  survey_response$helpful2[i] <- picks[2]
+  survey_response$helpful3[i] <- picks[3]
+}
+
+
+K <- length(more_detail)
+
+
+# Non-Indigenous group has uniform probabilties
+p_non_detail <- rep(1/K, K)
+
+# Indigenous probabilities 
+w_more_detail <- c(
+  0.036, # Before High School
+  0.036, # Transitioning
+  0.036, # Study Techniques
+  0.036, # Pathways to Post-Secon
+  0.070, # Course Selection (TOP 3)
+  0.036, # Extracurriculars
+  0.070, # Awards (TOP 3)
+  0.036, # Uni Program Req
+  0.036, # OUAC
+  0.036, # Uni Admissions
+  0.036, # Post-Sec program
+  0.036, # Dos and Donts
+  0.073, # Scholarships (TOP 3)
+  0.036  # Applying Abroad
+)
+p_ind_detail <- w_more_detail / sum(w_more_detail)
+
+
+pick3_vec <- function(opts, prob) sample(opts, 3, replace = FALSE, prob = prob)
+
+# allocate new columns
+n <- nrow(survey_response)
+survey_response$needs_detail1 <- NA_character_
+survey_response$needs_detail2 <- NA_character_
+survey_response$needs_detail3 <- NA_character_
+
+# fill row by row
+for (i in seq_len(n)) {
+  if (survey_response$is_indigenous[i] == "Yes") {
+    picks <- pick3_vec(more_detail, p_ind_detail)
+  } else {
+    picks <- pick3_vec(more_detail, p_non_detail)
+  }
+  survey_response$needs_detail1[i] <- picks[1]
+  survey_response$needs_detail2[i] <- picks[2]
+  survey_response$needs_detail3[i] <- picks[3]
+}
+
+
+# Q1 (optional): "Based on your previous response, could you briefly explain what was lacking...?"
+q1_opts <- c("Blank", "Indigenous scholarship", "mentorship", "bursaries", "financial aid", "other")
+
+# Probabilities by group
+q1_prob_indig <- c(0.40, 0.20, 0.10, 0.10, 0.15, 0.05)  # more "Indigenous scholarship", some blanks
+q1_prob_non   <- c(0.35, 0.05, 0.15, 0.15, 0.25, 0.05)  # fewer "Indigenous scholarship", more "financial aid"
+
+# Q2 (mandatory): "Was there anything missing from the handbook...?"
+q2_opts <- c("Indigenous scholarship", "mentorship", "summer camp", "bursaries", "financial aid", "other")
+
+q2_prob_indig <- c(0.30, 0.15, 0.10, 0.20, 0.20, 0.05)
+q2_prob_non   <- c(0.10, 0.20, 0.15, 0.20, 0.30, 0.05)
+
+survey_response <- survey_response %>%
+  group_by(is_indigenous) %>%
+  mutate(
+    # Q1: optional (can be Blank)
+    lacking_keyword = if (first(is_indigenous) == "Yes") {
+      sample(q1_opts, size = n(), replace = TRUE, prob = q1_prob_indig)
+    } else {
+      sample(q1_opts, size = n(), replace = TRUE, prob = q1_prob_non)
+    },
+    # Q2: mandatory keyword
+    missing_more_keyword = if (first(is_indigenous) == "Yes") {
+      sample(q2_opts, size = n(), replace = TRUE, prob = q2_prob_indig)
+    } else {
+      sample(q2_opts, size = n(), replace = TRUE, prob = q2_prob_non)
+    }
+  ) 
+
+```
+
+# 1 Introduction
+
+Indigenous students in Canada face systemic and structural barriers that shape their educational pathways. Despite Ontario being home to the largest Indigenous population in absolute terms, Indigenous youth remain disproportionately underrepresented in postsecondary institutions compared to their non-Indigenous peers (Layton, 2023; Statistics Canada, 2022). The legacies of colonization and residential schooling have produced intergenerational trauma, which, along with under-resourced rural schools and financial constraints, challenges the transition to higher education (Deonandan et al., 2019; Nelson et al., 2018). Canadian education systems have historically privileged Eurocentric frameworks, marginalizing Indigenous knowledge systems and cultural identities (Deonandan et al., 2019). 
+
+Consequently, many Indigenous students are first-generation postsecondary learners who must navigate distinct socio-cultural and economic challenges, including community obligations and limited access to academic resources (Layton, 2025). Research has shown that tailored interventions integrating cultural relevance, mentoring, and community-based support can enhance Indigenous students’ success in higher education (Jin, 2021; Chenoweth et al., 2025). Effective strategies include programs that recognize Indigenous ways, create safe learning environments, and provide role models who reflect students’ identities (De Mars et al., 2022). 
+
+This project responds to these findings by focusing on how STEMBuddies can make their handbook a more inclusive and effective resource for Indigenous students. The handbook is designed to provide guidance on postsecondary opportunities in STEM, but its impact depends on whether it reflects the information needs of students from diverse backgrounds.. By identifying areas where Indigenous students feel sufficiently supported and where gaps remain, particularly regarding scholarships and financial resources, we seek to highlight actionable areas for improvement. Equally important is comparing Indigenous and non-Indigenous responses, so that STEMBuddies can tailor its materials to be equitable and responsive to different student identities. This leads us to our central research question: **Are Indigenous students more likely than non-Indigenous students to select “Scholarships” as one of their top three sections in the STEMbuddies’ handbook where they “need more information”?**
+
+# 2 Survey Showcasing
+
+The survey was built using Google Forms and can be accessed : (<https://forms.gle/j6jvWdzrgEQmzEZA9>). It consists of nine questions including three demographic questions, four needs-assessment questions, two open-ended questions, and a closing message thanking respondents for their participation. The demographic questions allow us to describe the sample and identify the proportion of respondents who belong to the target population, namely high school students in Ontario. The needs-assessment questions are designed to evaluate the usefulness of the STEMBuddies High School Handbook and to identify areas requiring improvement. The two open-ended questions allow respondents to provide additional feedback that may not be captured through fixed-choice options, such as recommending new sections for inclusion in the Handbook. This combination of closed- and open-ended questions ensures that both quantifiable trends and nuanced perspectives are captured (De Mars, Taken Alive, Burns Ortiz, Ma, & Wang, 2022).
+
+To test the survey, we conducted a pilot with ten peers, requesting feedback on clarity, flow, and completion time. Based on their comments, several questions were reworded to improve comprehensibility, and the survey was refined to be completed in under three minutes. This process ensured accessibility for high school students while preserving the collection of meaningful data. The two questions most relevant to our analysis are: 
+
+Q1. “Do you wish to self‑identify as an Aboriginal person in Canada such as First Nation, Métis or Inuit?”  
+
+Q2. “Which part of the Handbook do you think needs more detail / was not comprehensive enough?” 
+
+We selected Q1 because our target population is high school students in Ontario, and this question allows us to determine whether respondents identify as Indigenous. This distinction is crucial for our comparative analysis between Indigenous and non-Indigenous students. A strength of this question is that it uses widely recognized terminology (First Nation, Métis, Inuit), which is officially recognized in Canadian government frameworks (Gouvernement du Canada, 2024). However, we recognize that some respondents may be hesitant to disclose their identity which could lead to underreporting. To address this concern, we included a “Prefer not to say” option. Although this limits the number of Indigenous students, it respects participants’ privacy and accounts for those uncertain of their status. Additionally, while these categories may not include every Indigenous identity in Canada, they align with those used by Statistics Canada, which ensures comparability(Layton, 2023).
+
+We selected Q2 because it directly asks for feedback on the STEMBuddies Handbook. The question requires students to select up to three sections that they believe need more information. Allowing up to three choices is a good balance: if students were restricted to only one choice, important perspectives could be lost, while allowing unlimited selections would complicate interpretation. The main drawback of this design is that some respondents may find it difficult to limit their choices to three. However, given common practices in survey design and the need for reasonable results, this compromise was the most practical. A complete showcase of all survey questions is provided in Section 9.1 of the Appendix.
+
+# 3 Procedure
+
+To collect data on the effectiveness of the STEMBuddies Handbook, we propose implementing a non-probability, purposive (judgmental) sampling strategy. While probability sampling generally yields more reliable and unbiased estimates, practical constraints, like the dispersed and small population of interest, make it challenging to use (Layton, 2023). Purposive sampling method uses prior knowledge of the population to select participants, enhancing the relevance of the collected data(Chenoweth et al., 2025; Nelson et al., 2018).
+
+Our target population consists of high school students across Ontario. According toStatistics Canada (2022), the regions with the largest indigenous populations in Ontario include Ottawa–Gatineau, Toronto, Greater Sudbury, Thunder Bay, and Hamilton. Using the Ontario Ministry of Education’s school board directory, we identified eight school boards covering these regions, including approximately 230 schools. (Government of Ontario, 2023). We propose that STEMBuddies distribute the survey and Handbook to these boards and request that they share the materials with their high schools. This procedure focuses outreach on areas with higher Indigenous student populations, maximizing the likelihood of receiving relevant feedback while remaining feasible. The sample unit in this design is the individual high school student.
+
+This procedure carries strengths and limitations. A major strength is that purposive targeting increases efficiency and ensures representation of Indigenous students. However, non-probability methods are susceptible to selection bias. Other challenges include reliance on school boards to cooperate and the possibility of nonresponse bias if students choose not to participate (Groves et al., 2009). To mitigate these risks, the STEMBuddies should emphasize survey anonymity, voluntariness, and the direct benefits of participation.
+
+For analytical preparation, we simulated the survey data in R to reflect the expected responses from our target populations. For variables such as self-reported grades, Handbook length feedback, and responses from non-Indigenous students, random values were generated using the sample() function with uniform probabilities. For the target Indigenous population, we adjusted probabilities of Indigenous versus non-Indigenous respondents to 25% and 75%, respectively, consistent with regional population statistics (Thunder Bay \~13%; Ottawa–Gatineau \~3%; Toronto \~3%; Greater Sudbury \~1%; Hamilton \~1%) while accounting for potential self-identification patterns (Canada, S., 2022). Similarly, responses to content-specific questions (e.g., “Which part of the Handbook requires more detail?”) were weighted to reflect literature findings that Indigenous students prioritize financial support, with a 7.3% probability assigned to “Scholarships” versus 3.6% for other sections. To ensure reproducibility, all simulations used a fixed random seed ( set.seed(921)) and clearly documented probability weights, with additional procedural details provided in Section 9.3 of the Appendix.
+
+# 4 Data
+
+Our simulated dataset encompasses survey responses from 1,000 high school students in our selected regions. There are 1000 rows (observations) and 14 columns (variables);
+
+-   **grade**: High school grade (9-12)
+
+-   **is_indigenous**: whether the student identifies as Indigenous ("Yes", "No")
+
+-   **handbook_length**: opinion on the handbook length ("Too lengthy, "Moderate", "Too short")
+
+-   **is_first_gen**: whether the student is a first-generation post-secondary student ("Yes", "No", "Prefer not to say")
+
+-   **post_plan**: Intended post-secondary plan ("University", "College", "Apprenticeship", "Workforce", "Not sure"
+
+-   **helpful1/helpful2/helpful3**: Three choices each student selected for the "What section did you find the most helpful" part of the survey
+
+-   **needs_detail1/needs_detail2/needs_detail3**: Three choices each student selected for the "What part needs more detail" part of the survey
+
+-   **lacking_keyword**: extracted keyword from the short answer question of the survey, categorized in a set of pre-set options
+
+-   **missing_more_keyword**: extracted keyword from the long answer question of the survey, categorized in a set of pre-set options.
+
+-   **chose_scholarship**: binary indicator created by data cleaning. 1 indicates that the student chose scholarship as one of their responses from needs_detail1/needs_detail2/needs_detail3
+
+The **key variables** of interest are **is_indigenous** and **chose_scholarship**.
+
+To create the **chose_scholarship** variable, we have conducted data cleaning by iterating each students' responses ('needs_detail1', 'needs_detail2', 'needs_detail3') and if Scholarship appeared in any of these columns, we indicated 1 and otherwise 0.
+
+We will calculate the Confidence Interval by using these key variables, where we will calculate the proportion of students who chose scholarship by using the chose_scholarship variable and group them by considering the indicator variable is_indigenous.
+
+```{r, include=FALSE}
+# Example cleaning step:
+survey_response <- survey_response %>%
+  mutate(chose_scholarship = ifelse(
+    needs_detail1 == "Scholarships" | 
+    needs_detail2 == "Scholarships" | 
+    needs_detail3 == "Scholarships", 1, 0
+  ))
+
+```
+
+```{r, echo = FALSE, fig.width=4, fig.height=3, fig.align='center'}
+ggplot(survey_response, aes(x = is_indigenous, fill = factor(chose_scholarship))) + geom_bar(position= "fill") + scale_fill_manual(values = c("grey", "brown"), labels = c("Did not choose Scholarships", "Chose Scholarships"), name = "Response") + 
+  theme_minimal() +
+  labs(x = "Indigenous Status",
+       y = "Proportion",
+       title = "Figure 1: Proportion of Students Selecting \n Scholarships by Indigneous Status")
+
+```
+
+Figure 4.1 represents the proportion of Indigenous and Non-Indigenous identifying students who selected Scholarship as one of their top 3 choices from the question - "Which part of the Handbook do you think needs more detail/was not comprehensive enough?" part of the survey. It was reported that approximately 36% of Indigenous-identifying students chose scholarships, compared to approximately 24% of non Indigenous students.
+
+# 5 Methods
+
+## Research Question
+
+Our research question asks whether among surveyed high school students, is the proportion who list “Scholarships” as one of their top three “needs more detail” sections in the STEMBuddies Handbook higher for Indigenous students compared to non-Indigenous students.
+
+To support our research question, that the likelihood of selecting "Scholarships" as one of their top-three for "needs more detail" section, we use a **Two-Proportion Confidence Interval**. Two-Proportion Confidence Interval examines the true difference between two samples by calculating the proportion from each group, finding the difference by subtracting the proportion and find the confidence interval which this true difference is likely to lie in between, which we will use 95% Confidence Interval for computing the likelihoodness. This method is appropriate because we are comparing two independent groups (Indigenous vs. non-Indigenous high school students) on a categorical outcome (whether or not they selected “Scholarships”).
+
+## Null and Alternative Hypothesis
+
+$H_0: p_1 = p_2$
+
+$H_A: p_1 > p_2$
+
+Where $p_1$ indicates the Indigenous student population and $p_2$ indicates the Non-Indigenous student population.
+
+Our null hypothesis was that the proportions were equal and our alternative hypothesis was that Indigenous students had a higher proportion than non-Indigenous students.
+
+## Test Statistic
+
+$$Z_c = \frac{(\hat{p}_1 - \hat{p}_2)}{\sqrt{\hat{p}(1-\hat{p})(\frac{1}{n_1}+\frac{1}{n_2})}}$$
+
+$$
+where \,\,\, \hat{p} = \frac{n_1\hat{p}_1+n_2\hat{p}_2}{n_1 + n_2}
+$$
+
+$n_1$: Number of students self-identifying as Indigenous from the survey
+
+$n_2$: Number of students NOT self-identifying as Indigenous from the survey = Non-Indigenous students
+
+$\hat{p_1}:$ Proportion of Indigenous students that selected "Scholarship" as one their their top three "needs more information" response
+
+$\hat{p_2}:$ Proportion of Non-Indigenous students that selected "Scholarship" as one their their top three "needs more information" response
+
+## Confidence Interval with 95%
+
+The formula for the two-proportion CI is:
+
+$$
+(\hat{p}_1 - \hat{p}_2)\ \pm\ z_{\alpha/2}\,
+\sqrt{\frac{\hat{p}_1(1-\hat{p}_1)}{n_1} + \frac{\hat{p}_2(1-\hat{p}_2)}{n_2}}
+$$
+
+where $\hat{p}_1$ , $\hat{p}_2$ , ${n_1}$ and ${n_2}$ are the same, and $z_{\alpha/2}$ the critical value from the standard normal distribution, which equals 1.96 for a 95% confidence level
+
+This interval estimates the difference between two population proportions while accounting for sample variability. If the confidence interval does not include zero, we can conclude that the groups differ in a statistically meaningful way.
+
+```{r, echo=FALSE}
+
+# Create a table 
+survey_response <- survey_response %>%
+  mutate(chose_scholarship = ifelse(
+    needs_detail1 == "Scholarships" |
+    needs_detail2 == "Scholarships" |
+    needs_detail3 == "Scholarships", 1, 0))
+
+scholarship_tab <- table(
+  Indigenous = survey_response$is_indigenous,
+  Chose_Scholarship = survey_response$chose_scholarship
+)
+# Chose_Scholarship = 0 indicates No, 1 indicates Yes
+```
+
+```{r, echo=FALSE}
+
+
+
+n1 <- sum(survey_response$is_indigenous == "Yes")  # Indigenous students
+n2 <- sum(survey_response$is_indigenous == "No")   # Non-Indigenous students
+x1 <- sum(survey_response$chose_scholarship[survey_response$is_indigenous == "Yes"]) 
+x2 <- sum(survey_response$chose_scholarship[survey_response$is_indigenous == "No"])  
+
+
+phat1= x1 / n1
+phat2= x2 / n2
+
+
+Zstar <- (phat1 - phat2) / sqrt( phat1*(1 - phat1)/n1 + phat2*(1 - phat2)/n2 )
+
+pval <- (1 - pnorm(abs(Zstar))) * 2
+```
+
+```{r, echo=FALSE}
+x1 <- 98   # Indigenous-identifying students who chose Scholarships
+n1 <- 273  # Total Indigenous
+x2 <- 174  # Non-Indigenous-identifying students who chose Scholarships
+n2 <- 727  # Total Non-Indigenous
+
+phat1 <- x1 / n1
+phat2 <- x2 / n2
+
+# (phat1 - phat2)
+
+# Standard error
+SE <- sqrt((phat1 * (1 - phat1) / n1) + (phat2 * (1 - phat2) / n2))
+
+# Critical value for 95% CI
+z <- 1.96
+
+# Confidence interval
+CI_low  <- (phat1 - phat2) - z * SE
+CI_high <- (phat1 - phat2) + z * SE
+
+```
+
+## Interpretation
+
+We are 95% confident that the difference between the proportions of Indigenous students and Non-indigenous students who chose Scholarship as one of their top 3 choices from the "Need more information" part of the survey lies between 5.5% and 18.4%.
+
+# 6 Results
+
+Among surveyed students, 36% of Indigenous students selected "Scholarships" as one of their top three sections needing more information, compared to 24% of non-Indigenous students. The estimated difference in proportions was 12%.
+
+1.  Find $\hat{p_1}$ and $\hat{p_2}$
+
+$\hat{p_1}$ = $\frac{x_1}{n_1}$ = $\frac{98}{273} = 0.36$
+
+$\hat{p_2}$ = $\frac{x_2}{n_2}$ = $\frac{174}{727} = 0.24$
+
+2.  Find the critical value
+
+$z_{\frac{\alpha}{2}}$ = $z_{\frac{\alpha}{2}} = 1.96$
+
+The hypothesis test produced a z-statistic of 3.62 with a p-value of 0.0003, which is below the 0.05 significance threshold. This indicates strong evidence that Indigenous students are more likely than non-Indigenous students to prioritize more information on scholarships.
+
+$z = 3.62, \,\,\,\,p \approx 0.0003 < 0.05$
+
+The 95% confidence interval for the difference in proportions ranged from 5.5% to 18.4%, confirming that the true difference is positive. These findings are consistent with expectations from the literature that highlight financial support as a key factor influencing Indigenous students’ post-secondary participation.Thus, we reject the null hypothesis and accept our alternative hypothesis.
+
+|                         | Proportion of Outcome Variable | 95% Confidence Interval of Outcome Variable |
+|-------------------|----------------------|-------------------------------|
+| Indigenous Students     | 0.36                           | \-                                          |
+| Non-Indigenous Students | 0.24                           | \-                                          |
+| Difference (Ind - Non)  | 0.12                           | (0.055, 0.184)                              |
+
+\newpage
+
+# 7 Generative AI Statement
+
+We utilized ChatGPT (OpenAI) to support specific aspects of the R coding workflow, particularly in simulating survey questions that allowed multiple responses. While STA304 provided guidance for single-response simulations, the extension to multiple-response questions required additional procedural insight. We approached this by first developing our own code for single-response and demographic variables and then consulting ChatGPT to guide the adaptation for multiple-response structures. This process ensured that the final code was grounded in our original work rather than generated independently by AI.
+
+All AI-generated suggestions were critically evaluated. Functions not previously covered in coursework were verified through official documentation to ensure reliability, correct functionality, and proper attribution. In this way, ChatGPT acted as a supplementary tool, enabling us to focus on analysis and interpretation while maintaining ownership and integrity of the work.
+
+Additionally, ChatGPT was used to support minor writing improvements, such as identifying and correcting grammatical and punctuation errors. Feedback from the tool was incorporated selectively, ensuring that the final text reflects our own academic voice.
+
+# 8 Bibliography
+
+**ACADEMIC SOURCES:**
+
+1.  Chenoweth, E., Cotter, P., Straley, J., & Lanphier, K. (2025). Community-Based, Culturally Relevant STEM: Engaging Rural and Indigenous Students Through Partnerships, Institutional Flexibility, and One Health. Innovative Higher Education. <https://doi.org/10.1007/s10755-025-09819-8> 
+
+2.  Deonandan, R., Janoudi, G., & Uzun, M. (2019). Systematic Review of Indigenous Educational Experiences in Canada. Journal of Educational Leadership in Action Journal of Educational Leadership in Action, 6. <https://digitalcommons.lindenwood.edu/cgi/viewcontent.cgi?article=1032&context=ela> 
+
+3.  De Mars, A., Taken Alive, J., Burns Ortiz, M., Ma, Z., & Wang, M. (2022). Educators’ Perspectives on Factors Impacting STEM Achievement in Rural Indigenous Student-Serving Schools. The Rural Educator, 43(1), 24–36. <https://doi.org/10.35608/ruraled.v43i1.1207> 
+
+4.  Jin, Q. (2021). Supporting Indigenous Students in Science and STEM Education: A Systematic Review. Education Sciences, 11(9), 555. <https://doi.org/10.3390/educsci11090555> 
+
+5.  Layton, J. (2023, June 21). First Nations youth: Experiences and outcomes in secondary and postsecondary learning. Statistics Canada; Government of Canada. <https://www150.statcan.gc.ca/n1/pub/81-599-x/81-599-x2023001-eng.htm> 
+
+6.  Layton, J. (2025, January 29). Using data from the 2021 Census of Population and Index of Remoteness, this study examines the extent to which the remoteness of one’s community continues to act as a barrier to education compared to 2016, with a focus on First Nations people, Métis and Inuit. This study also examines other potential factors relevant to educational attainment and sheds light on the learning context of First Nations people, Métis, and Inuit. Statcan.gc.ca; Government of Canada, Statistics Canada. <https://www150.statcan.gc.ca/n1/pub/75-006-x/2025002/article/00002-eng.htm> 
+
+7.  Nelson, H. J., Cox-White, T. L.-A., & Ziefflie, B. A. (2018). Indigenous students: Barriers and success strategies-A review of existing literature. Journal of Nursing Education and Practice, 9(3), 70. <https://doi.org/10.5430/jnep.v9n3p70>
+
+**ADDITIONAL SOURCES:**
+
+1.  Aboriginal self-identification question - Legal Aid Ontario. (2025). Legal Aid Ontario.<https://www.legalaid.on.ca/lawyers-legal-professionals/for-aboriginal-legal-issues/aboriginal-self-identification-question/>
+
+2.  Canada, S. (2022, December 16). Top 10 census metropolitan areas and census agglomerations by indigenous population, Ontario, 2021. Statistics Canada. <https://www12.statcan.gc.ca/census-recensement/2021/as-sa/fogs-spg/alternative.cfm?topic=8&lang=e&dguid=2021A000235&objectId=8_2> 
+
+3.  Cfs Ontario. (2021). Factsheet: Indigenous Education. <https://cfsontario.ca/wp-content/uploads/2021/11/Indigenous-Education_Factsheets_2021_EN.pdf>
+
+4.  Datacamp. (n.d.). ifelse function \| R Documentation. Www.rdocumentation.org. <https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/ifelse> 
+
+5.  Datacamp. (2019). list function - RDocumentation. Rdocumentation.org. <https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/list> 
+
+6.  DWR447. (2016, October 30). Two Proportion Z test with R. YouTube. <https://www.youtube.com/watch?v=xWwnVYO4Aus> 
+
+7.  Gouvernement du Canada. (2024, November 27). Government of Canada. <https://www.canada.ca/en/public-service-commission/services/appointment-framework/guides-tools-appointment-framework/affirmation-indigenous-identity-form.html> 
+
+8.   Greenfield, E. (2020). Supporting Indigenous Student Success in Post-Secondary Education Thriving from Application to Graduation. <https://www.socialconnectedness.org/wp-content/uploads/2020/09/PDF-Supporting-Indigenous-Student-Success.pdf> 
+
+9.  STEMBuddies: Empowering Future Innovators. (2025). Stembuddies.ca. <https://stembuddies.ca/> 
+
+10. The Conference Board of Canada. (2020, December 9). Indigenous STEM Access Programs.<https://fsc-ccf.ca/wp-content/uploads/2020/12/10872_25005_issue-briefing_indigenous-stem-access-programs.pdf> 
+
+11. Webb, R. (2021, August 10). 9.3: Two Proportion Z-Test and Confidence Interval. Statistics LibreTexts. <https://stats.libretexts.org/Bookshelves/Introductory_Statistics/Mostly_Harmless_Statistics_(Webb)/09%3A_Hypothesis_Tests_and_Confidence_Intervals_for_Two_Populations/9.03%3A_Two_Proportion_Z-Test_and_Confidence_Interval> 
+
+12. W3 Schools. (n.d.). R Functions. Www.w3schools.com. <https://www.w3schools.com/r/r_functions.asp> 
+
+13. W3 Schools. (n.d.-b). R If...Else. Www.w3schools.com. <https://www.w3schools.com/r/r_if_else.asp>
+
+# 9 Appendix
+
+## 9.1 Survey questions
+
+1.  The survey administered to participants consisted of two sections: demographic questions and assessment questions. All questions were designed to collect information relevant to evaluating the STEMBuddies Handbook.
+
+    Demographic questions:
+
+    1\. What grade are you in?
+
+    -   Grade 9
+
+    -   Grade 10
+
+    -   Grade 11
+
+    -   Grade 12\
+        \
+
+    2\. Do you wish to self-identify as an Aboriginal person in Canada (such as First Nation, Métis, or Inuit)?
+
+    -   Yes
+
+    -   No
+
+    -   Prefer not to say\
+        \
+
+    3\. Are you a first-generation university student (i.e., did your parents/legal guardians complete a 4-year university degree)?
+
+    -   Yes
+
+    -   No
+
+    -   Prefer not to say\
+        \
+
+    4\. What are your plans after high school?
+
+    -   University
+
+    -   College
+
+    -   Apprenticeship
+
+    -   Workforce
+
+    -   Not sure\
+        \
+
+    Assessment questions: 
+
+    5\. What did you think of the length of the STEMBuddies Handbook?
+
+    -   Too lengthy
+
+    -   Moderate length
+
+    -   Too short
+
+    -   Other: \_\_\_\_\_\_\_\
+        \
+
+    6\. Which part of the handbook did you find the most helpful?\
+    (Please pick your top 3 only)
+
+    -   Before High School: Considering Different High School Programs
+
+    -   Transitioning from Middle School
+
+    -   Study Techniques
+
+    -   Pathways to Postsecondary Education
+
+    -   Course Selection
+
+    -   Extracurriculars
+
+    -   Awards
+
+    -   University Program Requirements
+
+    -   How to Navigate OUAC
+
+    -   Admissions Into University Programs
+
+    -   Choosing Your Postsecondary Program
+
+    -   Do’s and Don’ts
+
+    -   Applying to Scholarships
+
+    -   Applying Abroad (USA)\
+        \
+
+    7\. Which part of the handbook do you think needs more information/was not comprehensive enough?\
+    (Please pick your top 3 only)
+
+    -   Before High School: Considering Different High School Programs
+
+    -   Transitioning from Middle School
+
+    -   Study Techniques
+
+    -   Pathways to Postsecondary Education
+
+    -   Course Selection
+
+    -   Extracurriculars
+
+    -   Awards
+
+    -   University Program Requirements
+
+    -   How to Navigate OUAC
+
+    -   Admissions Into University Programs
+
+    -   Choosing Your Postsecondary Program
+
+    -   Do’s and Don’ts
+
+    -   Applying to Scholarships
+
+    -   Applying Abroad (USA)
+
+    \
+
+    8\. Based on your previous response, could you briefly explain what was lacking in that specific section?
+
+    -   Open-ended short answer\
+        \
+
+    9\. Was there anything missing from the handbook that you would have wanted to know more about (if applicable)?
+
+    -   Open-ended long answer
+
+## 9.2 Simulated Survey Data
+
+Below is a `glimpse()` or `head()` of my simulated data (this should be the data that looks like the inputs from your survey). This is the only place in the report where you can show your raw R code and output.
+
+```{r, echo=FALSE}
+glimpse(survey_response)
+```
+
+## 9.3 Procedure
+
+For the data simulation process as described in the procedure section, we used random sampling for certain sections and knowledge from literature review to guide certain simulation parts. Below, we describe the logic for simulating the data for the rest of the questions and variables.
+
+Literature highlights that Indigenous students are more likely to be first-generation due to historical and structural factors such as family history and trauma from residential schools in the past. Probabilities were therefore set to 65% for Indigenous first-gen students and 40% for non-Indigenous first-gen students.
+
+For the two open-ended questions at the end of the survey, we used a different approach. For the question asking to elaborate what was lacking in the section that the student found not comprehensive enough, since it was optional, one possible response was “Blank.” Other categories included “Indigenous scholarship”, “mentorship”, “bursaries”, “financial aid” and “other” (if student answered N/A or uncategorized responses, this is indicated as other).
+
+For the last open ended questions aksing whether there was anything missing from the handbook it had the same categories as above but without “Blank” (since this question was mandatory).
+
+Considering these factors, we have adjusted the probabilities as follows:
+
+| Variable                                | Category               | Probability (Indigenous) | Probability (Non-Indigenous) |
+|-------------------|------------------|------------------|------------------|
+| First-generation university student     | Yes                    | 0.65                     | 0.40                         |
+|                                         | No                     | 0.35                     | 0.60                         |
+| Post-secondary plans                    | University             | 0.20                     | 0.35                         |
+|                                         | College                | 0.15                     | 0.20                         |
+|                                         | Apprenticeship         | 0.10                     | 0.20                         |
+|                                         | Workforce              | 0.30                     | 0.15                         |
+|                                         | Not sure               | 0.30                     | 0.10                         |
+| Open-ended: Lacking content (optional)  | Blank                  | 0.40                     | 0.35                         |
+|                                         | Indigenous scholarship | 0.20                     | 0.05                         |
+|                                         | Mentorship             | 0.10                     | 0.15                         |
+|                                         | Bursaries              | 0.10                     | 0.15                         |
+|                                         | Financial aid          | 0.15                     | 0.25                         |
+|                                         | Other                  | 0.05                     | 0.05                         |
+| Open-ended: Missing content (mandatory) | Indigenous scholarship | 0.30                     | 0.10                         |
+|                                         | Mentorship             | 0.15                     | 0.20                         |
+|                                         | Bursaries              | 0.10                     | 0.15                         |
+|                                         | Financial aid          | 0.20                     | 0.20                         |
+|                                         | Other                  | 0.20                     | 0.30                         |
+|                                         | Unclassified           | 0.05                     | 0.05                         |
+
+## 9.4 EDA
+
+```{r, echo=FALSE}
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+
+
+survey_response <- survey_response %>%
+  dplyr::ungroup() %>% 
+  mutate(
+    group = case_when(
+      is_indigenous == "Yes" & is_first_gen == "Yes" ~ "Indigenous First-gen",
+      is_indigenous == "Yes" & is_first_gen != "Yes" ~ "Indigenous Non First-gen",
+      is_indigenous == "No"  & is_first_gen == "Yes" ~ "Non-Indigenous First-gen",
+      is_indigenous == "No"  & is_first_gen != "Yes" ~ "Non-Indigenous Non First-gen"
+    )
+  )
+
+
+detail_long <- survey_response %>%
+  select(group, needs_detail1, needs_detail2, needs_detail3) %>%
+  pivot_longer(
+    cols = starts_with("needs_detail"),
+    names_to = "rank",
+    values_to = "section"
+  )
+
+detail_pct <- detail_long %>%
+  count(group, section) %>%
+  group_by(group) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup()
+
+
+detail_pct <- detail_pct %>%
+  complete(group, section, fill = list(n = 0, pct = 0))
+
+section_order <- detail_pct %>%
+  group_by(section) %>%
+  summarise(avg_pct = mean(pct), .groups = "drop") %>%
+  arrange(desc(avg_pct)) %>%
+  pull(section)
+
+detail_pct <- detail_pct %>%
+  mutate(section = factor(section, levels = section_order))
+
+# Heatmap
+ggplot(detail_pct, aes(x = group, y = section, fill = pct)) +
+  geom_tile(color = NA) +           
+  geom_text(aes(label = percent(pct, accuracy = 0.1)), size = 3) +
+  scale_fill_gradient(low = "white", high = "red") +
+  labs(
+    title = "Sections Needing More Detail by Group",
+    x = "Group",
+    y = "Section",
+    fill = "Percent"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    axis.text.x = element_text(angle = 20, hjust = 1),
+    panel.grid = element_blank()
+  )
+
+
+```
+
+The heatmap illustrates the distribution of responses from the question that asks which section needed more detail that it should be further elaborated in the handbook. we assessed by examining four groups: Indigenous and First-generation (**Indigenous First-gen**), Indigenous but not First-generation (**Indigenous Non First-gen**), Non-Indigenous and First-gen (**Non-Indigenous First-gen**), and Non-Indigenous but not First-gen (**Non-Indigenous Non First-gen**).
+
+The intensity of colour represents the proportion of students in each group based on their selection, where darker red indicates higher percentages, and lighter indicates lower. It was reported that Indigenous Non First-gen had Awards and Scholarships as the most selected options with 13.3% for both, and Indigenous First-generation students also preferred the same options with similar percentage, Scholarships (11.9%) and Awards (11.4%).
+
+The overall pattern follows that regardless of the first-generation status, there is ab trend where Indigenous students most preferred Scholarships and Awards, which are categorized as financial support constraints. This suggests that financial constraint is one of the outstanding factor to consider in higher education, which aligns with the motivation of our research question, and it is suggested for STEMbuddies handbook to further elaborate on various scholarships, specifically in Indigenous students scholarship, for the handbook improvement.
