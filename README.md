@@ -155,7 +155,7 @@ This finding aligns with literature on financial barriers and postsecondary acce
 ## **Repository Structure**
 
 ```
-Assignment1/
+Survey_Design_and_Data_Simulation/
 ├── Survey_Design.qmd          # Complete Quarto code for survey simulation and analysis
 ├── Survey_Desig.pdf           # Final rendered report
 ├── STEMBuddies Handbook.pdf   # Reference document for context
