@@ -14,7 +14,7 @@
 * [Repository Structure](#repository-structure)
 * [Reproducibility & Usage](#reproducibility--usage)
 * [Generative AI Statement](#generative-ai-statement)
-* [Citations](#citations)
+* [References](#references)
 
 ---
 
@@ -196,7 +196,48 @@ In summary:
 * Final code, analysis, and interpretation were completed by the authors
 * AI was used strictly within STA304 guidelines
 
-## **Citations**
+# **References (APA 7th edition)**
 
-Academic sources used in the report are included in the full bibliography (see PDF).
-They cover Indigenous education barriers, culturally relevant programming, and structural inequities in postsecondary access.
+### **Academic Sources**
+
+1. Chenoweth, E., Cotter, P., Straley, J., & Lanphier, K. (2025). *Community-Based, Culturally Relevant STEM: Engaging Rural and Indigenous Students Through Partnerships, Institutional Flexibility, and One Health.* **Innovative Higher Education.** [https://doi.org/10.1007/s10755-025-09819-8](https://doi.org/10.1007/s10755-025-09819-8)
+2. Deonandan, R., Janoudi, G., & Uzun, M. (2019). *Systematic Review of Indigenous Educational Experiences in Canada.* **Journal of Educational Leadership in Action, 6.**
+   [https://digitalcommons.lindenwood.edu/cgi/viewcontent.cgi?article=1032&context=ela](https://digitalcommons.lindenwood.edu/cgi/viewcontent.cgi?article=1032&context=ela)
+3. De Mars, A., Taken Alive, J., Burns Ortiz, M., Ma, Z., & Wang, M. (2022). *Educators’ Perspectives on Factors Impacting STEM Achievement in Rural Indigenous Student-Serving Schools.* **The Rural Educator, 43(1), 24–36.** [https://doi.org/10.35608/ruraled.v43i1.1207](https://doi.org/10.35608/ruraled.v43i1.1207)
+4. Jin, Q. (2021). *Supporting Indigenous Students in Science and STEM Education: A Systematic Review.* **Education Sciences, 11(9), 555.** [https://doi.org/10.3390/educsci11090555](https://doi.org/10.3390/educsci11090555)
+5. Layton, J. (2023). *First Nations youth: Experiences and outcomes in secondary and postsecondary learning.* Statistics Canada.
+   [https://www150.statcan.gc.ca/n1/pub/81-599-x/81-599-x2023001-eng.htm](https://www150.statcan.gc.ca/n1/pub/81-599-x/81-599-x2023001-eng.htm)
+6. Layton, J. (2025). *Using 2021 Census and the Index of Remoteness to examine barriers to education for First Nations, Métis, and Inuit learners.* Statistics Canada.
+   [https://www150.statcan.gc.ca/n1/pub/75-006-x/2025002/article/00002-eng.htm](https://www150.statcan.gc.ca/n1/pub/75-006-x/2025002/article/00002-eng.htm)
+7. Nelson, H. J., Cox-White, T. L.-A., & Ziefflie, B. A. (2018). *Indigenous students: Barriers and success strategies — A review of existing literature.* **Journal of Nursing Education and Practice, 9(3), 70.** [https://doi.org/10.5430/jnep.v9n3p70](https://doi.org/10.5430/jnep.v9n3p70)
+
+---
+
+### **Additional Sources**
+
+8. *Aboriginal self-identification question.* Legal Aid Ontario (2025).
+   [https://www.legalaid.on.ca/lawyers-legal-professionals/for-aboriginal-legal-issues/aboriginal-self-identification-question/](https://www.legalaid.on.ca/lawyers-legal-professionals/for-aboriginal-legal-issues/aboriginal-self-identification-question/)
+9. Statistics Canada (2022). *Top 10 census metropolitan areas and census agglomerations by Indigenous population, Ontario, 2021.*
+   [https://www12.statcan.gc.ca/census-recensement/2021/as-sa/fogs-spg/alternative.cfm?topic=8&lang=e&dguid=2021A000235&objectId=8_2](https://www12.statcan.gc.ca/census-recensement/2021/as-sa/fogs-spg/alternative.cfm?topic=8&lang=e&dguid=2021A000235&objectId=8_2)
+10. CFS Ontario (2021). *Factsheet: Indigenous Education.*
+    [https://cfsontario.ca/wp-content/uploads/2021/11/Indigenous-Education_Factsheets_2021_EN.pdf](https://cfsontario.ca/wp-content/uploads/2021/11/Indigenous-Education_Factsheets_2021_EN.pdf)
+11. Datacamp. *ifelse function | R Documentation.*
+    [https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/ifelse](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/ifelse)
+12. Datacamp (2019). *list function – RDocumentation.*
+    [https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/list](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/list)
+13. DWR447 (2016). *Two Proportion Z-Test with R.* YouTube.
+    [https://www.youtube.com/watch?v=xWwnVYO4Aus](https://www.youtube.com/watch?v=xWwnVYO4Aus)
+14. Government of Canada (2024). *Affirmation of Indigenous Identity Form.*
+    [https://www.canada.ca/en/public-service-commission/services/appointment-framework/guides-tools-appointment-framework/affirmation-indigenous-identity-form.html](https://www.canada.ca/en/public-service-commission/services/appointment-framework/guides-tools-appointment-framework/affirmation-indigenous-identity-form.html)
+15. Greenfield, E. (2020). *Supporting Indigenous Student Success in Post-Secondary Education: Thriving from Application to Graduation.*
+    [https://www.socialconnectedness.org/wp-content/uploads/2020/09/PDF-Supporting-Indigenous-Student-Success.pdf](https://www.socialconnectedness.org/wp-content/uploads/2020/09/PDF-Supporting-Indigenous-Student-Success.pdf)
+16. STEMBuddies (2025). *STEMBuddies: Empowering Future Innovators.*
+    [https://stembuddies.ca/](https://stembuddies.ca/)
+17. The Conference Board of Canada (2020). *Indigenous STEM Access Programs.*
+    [https://fsc-ccf.ca/wp-content/uploads/2020/12/10872_25005_issue-briefing_indigenous-stem-access-programs.pdf](https://fsc-ccf.ca/wp-content/uploads/2020/12/10872_25005_issue-briefing_indigenous-stem-access-programs.pdf)
+18. Webb, R. (2021). *Two Proportion Z-Test and Confidence Interval.* Statistics LibreTexts.
+    [https://stats.libretexts.org/Bookshelves/Introductory_Statistics/Mostly_Harmless_Statistics_(Webb)/09%3A_Hypothesis_Tests_and_Confidence_Intervals_for_Two_Populations/9.03%3A_Two_Proportion_Z-Test_and_Confidence_Interval](https://stats.libretexts.org/Bookshelves/Introductory_Statistics/Mostly_Harmless_Statistics_%28Webb%29/09%3A_Hypothesis_Tests_and_Confidence_Intervals_for_Two_Populations/9.03%3A_Two_Proportion_Z-Test_and_Confidence_Interval)
+19. W3Schools. *R Functions.*
+    [https://www.w3schools.com/r/r_functions.asp](https://www.w3schools.com/r/r_functions.asp)
+20. W3Schools. *R If…Else.*
+    [https://www.w3schools.com/r/r_if_else.asp](https://www.w3schools.com/r/r_if_else.asp)
