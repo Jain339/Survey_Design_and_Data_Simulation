@@ -1,21 +1,6 @@
 # Survey Design & Confidence Interval Analysis
 
 **Authors:** Narae Lee, Nikita Jain, Radia Salam
-
-## **Table of Contents**
-
-* [Project Overview](#project-overview)
-* [Research Question](#research-question)
-* [Survey Design](#survey-design)
-* [Sampling Procedure](#sampling-procedure)
-* [Data Overview](#data-overview)
-* [Modeling & Statistical Methods](#modeling--statistical-methods)
-* [Results](#results)
-* [Repository Structure](#repository-structure)
-* [Reproducibility & Usage](#reproducibility--usage)
-* [Generative AI Statement](#generative-ai-statement)
-* [References](#references)
-
 ---
 
 ## **Project Overview**
