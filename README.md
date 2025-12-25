@@ -1,6 +1,4 @@
 # Survey Design & Confidence Interval Analysis
-
-**Authors:** Narae Lee, Nikita Jain, Radia Salam
 ---
 
 ## **Project Overview**
